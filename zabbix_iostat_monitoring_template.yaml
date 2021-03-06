@@ -1,0 +1,459 @@
+zabbix_export:
+  version: '5.4'
+  date: '2021-03-06T17:00:05Z'
+  groups:
+    -
+      name: 'Linux servers'
+  templates:
+    -
+      template: 'Iostat monitoring'
+      name: 'Iostat monitoring'
+      groups:
+        -
+          name: 'Linux servers'
+      applications:
+        -
+          name: iostat
+      discovery_rules:
+        -
+          name: 'Disk Discovery'
+          key: iostat.discovery
+          delay: 30s
+          filter:
+            conditions:
+              -
+                macro: '{#HARDDISK}'
+                value: '^((xvd|sd|hd|vd)[a-z]|md[0-9]+|(nvme[0-9]+n[0-9]+))'
+                formulaid: A
+          item_prototypes:
+            -
+              name: 'Disk {#HARDDISK} average queue length of the requests'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},aqu-sz]'
+              delay: '0'
+              value_type: FLOAT
+              units: KBs
+              description: 'The average queue length of the requests that were issued to the device. Note: In previous versions, this field was known as avgqu-sz.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''aqu-sz'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} discard requests per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},d/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: ops
+              description: 'The number (after merges) of discard requests completed per second for the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''d/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} average size of the discard requests'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},dareq-sz]'
+              delay: '0'
+              value_type: FLOAT
+              units: KBs
+              description: 'The average size (in kilobytes) of the discard requests that were issued to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''dareq-sz'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} discard data per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},dMB/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: MBs
+              description: 'The number of sectors (megabytes) discarded for the device per second.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''dMB/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} discard requests (merged) per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},drqm/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: ops
+              description: 'The number of discard requests merged per second that were queued to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''drqm/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} % discard requests (merged) per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},drqm]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'The percentage of discard requests merged together before being sent to the device'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''drqm'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} time spent by the discard requests in queue'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},d_await]'
+              delay: '0'
+              value_type: FLOAT
+              units: ms
+              description: 'The average time (in milliseconds) for discard requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''d_await'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} flush requests per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},f/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: ops
+              description: 'The number (after merges) of flush requests completed per second for the device.  This counts flush requests executed by disks. Flush requests are not tracked for partitions.  Before being merged, flush operations are counted as writes.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''f/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} time spent by the flush requests in queue'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},f_await]'
+              delay: '0'
+              value_type: FLOAT
+              units: ms
+              description: 'The average time (in milliseconds) for flush requests issued to the device to be served.  The block layer combines flush requests and executes at most one at a time.  Thus flush operations could be twice as long: Wait for current flush request, then execute it, then wait for the next one.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''f_await'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} read requests per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},r/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: ops
+              description: 'The number (after merges) of read requests completed per second for the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''r/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} average size of the read requests'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},rareq-sz]'
+              delay: '0'
+              value_type: FLOAT
+              units: KBs
+              description: 'The average size (in kilobytes) of the read requests that were issued to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''rareq-sz'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} read data per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},rMB/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: MBs
+              description: 'The number of sectors (megabytes) read from the device per second.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''rMB/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} read requests (merged) per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},rrqm/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'The number of read requests merged per second that were queued to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''rrqm/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} % read requests (merged) per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},rrqm]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'The percentage of read requests merged together before being sent to the device'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''rrqm'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} time spent by the read requests in queue'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},r_await]'
+              delay: '0'
+              value_type: FLOAT
+              units: ms
+              description: 'The average time (in milliseconds) for read requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''r_await'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+              trigger_prototypes:
+                -
+                  expression: '{last()}>2'
+                  name: 'Disk {#HARDDISK} time spent by the read requests in queue'
+                  priority: DISASTER
+                  description: 'Read request slower than 2ms'
+            -
+              name: 'Disk {#HARDDISK} utilization'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},util]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'Device utilization in %'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.util
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+              trigger_prototypes:
+                -
+                  expression: '{last()}>70'
+                  name: 'Disk {#HARDDISK} utilization high'
+                  priority: HIGH
+                -
+                  expression: '{last()}>90'
+                  name: 'Disk {#HARDDISK} utilization high critical'
+                  priority: DISASTER
+            -
+              name: 'Disk {#HARDDISK} write requests per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},w/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: ops
+              description: 'The number (after merges) of write requests completed per second for the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''w/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} average size of the write requests'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},wareq-sz]'
+              delay: '0'
+              value_type: FLOAT
+              units: KBs
+              description: 'The average size (in kilobytes) of the write requests that were issued to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''wareq-sz'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} write data per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},wMB/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: MBs
+              description: 'The number of sectors (kilobytes, megabytes) written to the device per second.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''wMB/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} write requests (merged) per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},wrqm/s]'
+              delay: '0'
+              value_type: FLOAT
+              units: ops
+              description: 'The number of write requests merged per second that were queued to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''wrqm/s'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} % write requests (merged) per second'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},wrqm]'
+              delay: '0'
+              value_type: FLOAT
+              units: '%'
+              description: 'The percentage of write requests merged together before being sent to the device.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''wrqm'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+            -
+              name: 'Disk {#HARDDISK} time spent by the write requests in queue'
+              type: DEPENDENT
+              key: 'iostat.summary[{#HARDDISK},w_await]'
+              delay: '0'
+              value_type: FLOAT
+              units: ms
+              description: 'The average time (in milliseconds) for write requests issued to the device to be served. This includes the time spent by the requests in queue and the time spent servicing them.'
+              applications:
+                -
+                  name: iostat
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - '$[''w_await'']'
+              master_item:
+                key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+              trigger_prototypes:
+                -
+                  expression: '{last()}>3'
+                  name: 'Disk {#HARDDISK} time spent by the write requests in queue to high'
+                  priority: HIGH
+                  description: 'Disk query larger than 3 ms, this will lead to slowdowns'
+                -
+                  expression: '{last()}>5'
+                  name: 'Disk {#HARDDISK} time spent by the write requests in queue to high'
+                  priority: DISASTER
+                  description: 'Disk query larger than 5 ms, this really bad, need to investigate'
+            -
+              name: 'Disk {#HARDDISK} iostat summary'
+              key: 'system.run["iostat -xm -o JSON 1 1 | jq -r ''.sysstat.hosts[0].statistics[0].disk | .[] | select(.disk_device == \"{#HARDDISK}\")''"]'
+              delay: 20s
+              trends: '0'
+              value_type: TEXT
+              applications:
+                -
+                  name: iostat
